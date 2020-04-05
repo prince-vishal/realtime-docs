@@ -9,6 +9,7 @@ import Docs from './components/Docs.vue'
 Vue.use(Router);
 
 let router = new Router({
+    base:'/realtime-docs/',
     mode: 'history',
     routes: [
         {
