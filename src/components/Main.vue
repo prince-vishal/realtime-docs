@@ -36,11 +36,57 @@
                 </div>
             </div>
         </transition>
+
+        <transition name="fade" :duration="200">
+            <div class="share-dialog " tabindex="-1" role="dialog" v-if="showShareDialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header border-bottom">
+                            <h5 class="modal-title mb-3">Share Doc</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                    @click="hideShareDialog">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body px-0 mx-0 pt-2">
+                            <div class="alert alert-success mx-2" v-if="shared">
+                                <p class="text-center my-auto">This document has been successfully shared</p>
+                            </div>
+                            <div class="alert alert-danger mx-2" v-if="error">
+                                <p class="text-center my-auto">Something went wrong</p>
+                            </div>
+                            <div class="row mx-0 px-0">
+                                <div class="col-8 mx-auto">
+                                    <div class="form-group">
+                                        <label for="selectEmails" class="bmd-label-floating">Add Users to Share</label>
+                                        <multiselect id="selectEmails" v-model="values" tag-placeholder="Select a user"
+                                                     placeholder="Search by email" :option-height="20"
+                                                     :custom-label="customLabel" track-by="email"
+                                                     :options="userOptions" :multiple="true" :taggable="true"
+                                                     @tag="addEmail">
+
+                                        </multiselect>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer px-5 pb-3">
+                            <button :disabled="!active" class="btn btn-raised btn-primary btn-block"
+                                    @click="shareDocWithEmails">Share
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 
 <style>
-    .current-viewers-dialog {
+    .current-viewers-dialog, .share-dialog {
         position: fixed;
         top: 0;
         right: 0;
@@ -53,6 +99,11 @@
     .current-viewers-dialog .modal-body {
         overflow-y: auto;
         max-height: 80vh;
+    }
+
+    .share-dialog .modal-body {
+        overflow-y: auto;
+        height: 50vh;
     }
 
     .doc-container {
@@ -76,19 +127,44 @@
 
 <script>
     import utility from '../utilities';
+    import Multiselect from 'vue-multiselect'
 
     export default {
         name: 'Main',
         props: ['doc_id'],
-
+        components: {
+            Multiselect
+        },
         data: () => ({
             menuVisible: false,
             currentViewers: [1, 2, 3, 4, 5, 6],
             showDetails: false,
+            values: [],
+            active: true,
+            shared: false,
+            error: false
+
         }),
+        watch: {
+
+            values() {
+                this.error = false;
+                this.shared = false;
+            }
+
+        },
         computed: {
             showViewers() {
                 return this.$store.getters['docs/showViewers'];
+            },
+            userOptions() {
+                return this.$store.getters['docs/users'];
+            },
+            showShareDialog() {
+                return this.$store.getters['docs/showShareDialog'];
+            },
+            currentDoc() {
+                return this.$store.getters['docs/currentDoc'];
             },
             viewers() {
                 return [...this.$store.getters['docs/viewers'].values()];
@@ -100,9 +176,42 @@
             hideViewers() {
                 this.$store.commit('docs/hide_viewers');
             },
+            hideShareDialog() {
+                this.$store.commit('docs/hide_share_dialog');
+                this.active = true;
+                this.shared = false;
+            },
             timeSinceNow(time) {
                 return utility.timeSince(time);
 
+            },
+            addEmail(email) {
+                console.log(email);
+            },
+            shareDocWithEmails() {
+                this.active = false;
+                this.error = false;
+                this.shared = false;
+                let emails = [];
+                this.values.forEach((value) => {
+                    emails.push(value.email);
+                });
+                this.$store.dispatch('docs/shareDoc', {"id": this.currentDoc.id, "sharing_to": emails})
+                    .then(() => {
+                        this.active = true;
+                        this.shared = true;
+                        this.values = [];
+
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.active = true;
+                        this.error = true;
+                    });
+
+            },
+            customLabel({email, name}) {
+                return `${email}  ${name}`
             }
         }
     }

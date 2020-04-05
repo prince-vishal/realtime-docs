@@ -11,10 +11,12 @@ const state = {
     token: localStorage.getItem('token') || '',
     user: localStorage.getItem('user') || "",
     showViewers: false,
+    showShareDialog: false,
     isAuthorized: false,
     currentDoc: {},
     currentViewers: new Map(),
-    reRenderKey: utility.makeid(6)
+    reRenderKey: utility.makeid(6),
+    users:[]
 };
 const mutations = {
     /*
@@ -41,6 +43,9 @@ const mutations = {
         if (Object.prototype.hasOwnProperty.call(data, 'currentDoc'))
             state.currentDoc = data.currentDoc;
 
+        if (Object.prototype.hasOwnProperty.call(data, 'users'))
+            state.users = data.users;
+
         if (Object.prototype.hasOwnProperty.call(data, 'viewers')) {
             state.viewers = new Map();
             for (let i = 0; i < data.viewers.length; i++) {
@@ -65,6 +70,20 @@ const mutations = {
     * */
     hide_viewers(state) {
         state.showViewers = false;
+    },
+
+    /*
+    * Show Share modal
+    * */
+    show_share_dialog(state) {
+        state.showShareDialog = true;
+    },
+
+    /*
+    * Hide Share modal
+    * */
+    hide_share_dialog(state) {
+        state.showShareDialog = false;
     },
 
 
@@ -145,7 +164,6 @@ const actions = {
                 .then(() => {
                     axios({url: docsEndPoint, method: 'GET'})
                         .then(resp => {
-                            console.log(resp.data.data);
                             commit('docs_success', {"ownedDocs": resp.data.data});
                             resolve(resp.data)
                         })
@@ -173,7 +191,6 @@ const actions = {
                 .then(() => {
                     axios({url: docsEndPoint + '/viewed', method: 'GET'})
                         .then(resp => {
-                            console.log(resp.data.data);
                             commit('docs_success', {"recentlyViewedDocs": resp.data.data});
                             resolve(resp.data)
                         })
@@ -202,7 +219,6 @@ const actions = {
                 .then(() => {
                     axios({url: docsEndPoint + '/' + docData.id + '/viewers', method: 'GET'})
                         .then(resp => {
-                            console.log(resp.data.data);
                             commit('docs_success', {"viewers": resp.data.data});
                             resolve(resp.data)
                         })
@@ -230,7 +246,6 @@ const actions = {
                 .then(() => {
                     axios({url: docsEndPoint + '/' + docData.id, method: 'GET'})
                         .then(resp => {
-                            console.log(resp.data.data);
                             commit('docs_success', {"currentDoc": resp.data.data});
                             resolve(resp.data)
                         })
@@ -256,14 +271,66 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint + '/' + docData.id +'/is_authorized', method: 'GET'})
+                    axios({url: docsEndPoint + '/' + docData.id + '/is_authorized', method: 'GET'})
                         .then(resp => {
-                            console.log(resp.data.data);
                             commit('docs_success', {"isAuthorized": true});
                             resolve(resp.data)
                         })
                         .catch(err => {
                             commit('docs_success', {"isAuthorized": false});
+                            reject(err)
+                        });
+
+                })
+                .catch(err => {
+                    commit('docs_error', err);
+                    reject(err)
+                });
+
+        });
+    },
+    /*
+    * Share this doc with users
+    * */
+    shareDoc({dispatch, commit}, docData) {
+        return new Promise((resolve, reject) => {
+            commit('docs_request');
+            docData['access_role'] = "edit";
+            dispatch('checkIfAuthenticated')
+                .then(() => {
+                    axios({url: docsEndPoint + '/' + docData.id + '/share', data: docData, method: 'PUT'})
+                        .then(resp => {
+                            commit('docs_success', {"shared": true});
+                            resolve(resp.data)
+                        })
+                        .catch(err => {
+                            commit('docs_error', err);
+                            reject(err)
+                        });
+
+                })
+                .catch(err => {
+                    commit('docs_error', err);
+                    reject(err)
+                });
+
+        });
+    },
+    /*
+    * Share this doc with users
+    * */
+    fetchUsers({dispatch, commit}) {
+        return new Promise((resolve, reject) => {
+            commit('docs_request');
+            dispatch('checkIfAuthenticated')
+                .then(() => {
+                    axios({url: '/api/v1/users', method: 'GET'})
+                        .then(resp => {
+                            commit('docs_success', {"users": resp.data.data});
+                            resolve(resp.data)
+                        })
+                        .catch(err => {
+                            commit('docs_error', err);
                             reject(err)
                         });
 
@@ -286,6 +353,8 @@ const getters = {
     currentDoc: state => state.currentDoc,
     reRenderKey: state => state.reRenderKey,
     isAuthorized: state => state.isAuthorized,
+    showShareDialog: state => state.showShareDialog,
+    users: state => state.users,
 
 };
 

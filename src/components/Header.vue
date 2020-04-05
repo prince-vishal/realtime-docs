@@ -45,7 +45,7 @@
                     <i class="rounded-circle mw-100 mh-100 fa fa-line-chart"></i>
                 </div>
             </div>
-            <button type="button" class="share-btn"><i class="fa fa-user mr-1"></i> Share</button>
+            <button type="button" class="share-btn" @click="showShareDialog"><i class="fa fa-user mr-1"></i> Share</button>
         </div>
 
     </nav>
@@ -271,9 +271,12 @@
                 this.currentDetails = user;
                 this.showDetails = true;
             },
-
             showViewers() {
                 this.$store.commit('docs/show_viewers');
+            },
+            showShareDialog() {
+                this.$store.dispatch('docs/fetchUsers',{});
+                this.$store.commit('docs/show_share_dialog');
             },
             hideUserDetails() {
                 this.showDetails = false;
