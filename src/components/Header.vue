@@ -1,24 +1,25 @@
 <template>
     <nav class="navbar navbar-expand-lg navbar-light bb-0 bg-white px-3">
-        <a class="navbar-brand" href="#">Postman Docs</a>
+        <router-link class="navbar-brand" to="/">Postman Docs</router-link>
         <div class="ml-auto" style="display: inline-flex">
-            <div id="docs-presence-container" class="presence-inline-block docs-titlebar-button">
-                <div id="docs-presence" class="presence-inline-block mr-auto" v-show="currentViewers.length > 0">
+            <div id="docs-presence-container" class="presence-inline-block docs-titlebar-button d-flex">
+                <div id="docs-presence" class="presence-inline-block mr-auto"
+                     v-show="current_viewers && current_viewers.length > 0" :key="reRenderKey">
                     <div class="docs-presence-plus-widget presence-inline-block" style="max-width: 170px;">
                         <div class="docs-presence-plus-widget-inner presence-inline-block"
-                             @mouseover="showUserDetails(user)" @mouseleave="showDetails = false"
-                             v-for="(user,index) in currentViewers.slice(0,4)" :key="user"
+                             @mouseover="showUserDetails(user)" @mouseleave="hideUserDetails"
+                             v-for="(user,index) in current_viewers.slice(0,4)" :key="user.email"
                              :style="index === 0 ? '': 'left:'+(-10*index)+'px'">
                             <img
-                                    src="https://ui-avatars.com/api/?name=John+Doe&size=50"
+                                    :src="'https://ui-avatars.com/api/?name='+user.name.replace(/ /g,'+')+'&size=50'"
                                     alt="" class="rounded-circle mw-100 mh-100 user-img-thumb">
                         </div>
                         <div class="docs-presence-plus-widget-inner presence-inline-block"
-                             v-if="currentViewers.length > 4" :style="'left:'+(-10*4)+'px'"
-                             :title="'and '+ (currentViewers.length - 4) + ' more members'">
-                            <div class="rounded-circle mw-100 mh-100 extra-user">
+                             v-if="current_viewers.length > 4" :style="'left:'+(-10*4)+'px'"
+                             :title="'and '+ (current_viewers.length - 4) + ' more members'">
+                            <div class="rounded-circle mw-100 mh-100 extra-user" @click="showViewers">
 
-                                <span>+{{ currentViewers.length - 4 }}</span>
+                                <span>+{{ current_viewers.length - 4 }}</span>
 
                             </div>
                         </div>
@@ -32,13 +33,14 @@
                                         alt="" class="rounded-circle user-img-thumb">
                             </div>
                             <div class="col-9">
-                                <span class="user-name d-block">Seema Poonia</span>
-                                <a href="mailto:" class="user-email">seema@gmail.com</a>
+                                <span class="user-name d-block">{{currentDetails.name}}</span>
+                                <a href="mailto:" class="user-email">{{currentDetails.email}}</a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="d-inline view-history-btn" v-if="currentViewers.length === 0">
+                <div class="d-inline view-history-btn" v-if="viewers.length>0" @click="showViewers"
+                     title="View all viewers">
                     <i class="rounded-circle mw-100 mh-100 fa fa-line-chart"></i>
                 </div>
             </div>
@@ -212,8 +214,7 @@
         margin: auto;
     }
 
-    .current-viewers-dialog
-    {
+    .current-viewers-dialog {
         max-width: 50vh;
         overflow-y: auto;
     }
@@ -224,21 +225,53 @@
 <script>
     export default {
         name: 'Header',
+        props: ['doc_id'],
+        watch: {
+
+            reRenderKey() {
+                this.current_viewers = Array.from(this.$store.getters['docs/currentViewers'].values());
+            }
+
+        },
+        computed: {
+
+            reRenderKey() {
+                return this.$store.getters['docs/reRenderKey'];
+            },
+            viewers() {
+                return [...this.$store.getters['docs/viewers'].values()];
+            },
+
+            user() {
+                let userData = localStorage.getItem("user");
+                if (userData !== undefined && userData !== null) {
+                    return userData;
+                } else {
+                    return false;
+
+                }
+            }
+        },
+
         data: () => ({
             menuVisible: false,
-            currentViewers: [1, 2, 3, 4, 5, 6],
-            showDetails: false
+            showDetails: false,
+            currentDetails: {},
+            current_viewers: []
         }),
         methods: {
 
             showUserDetails(user) {
+                this.currentDetails = user;
                 this.showDetails = true;
-                console.log(user);
             },
 
-            showCurrentViewers()
-            {
-
+            showViewers() {
+                this.$store.commit('docs/show_viewers');
+            },
+            hideUserDetails() {
+                this.showDetails = false;
+                this.currentDetails = {};
             }
         }
     }
