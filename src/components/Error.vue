@@ -4,7 +4,7 @@
     <div class="row px-0 mx-0 mt-5">
       <div class="col-sm-10 col-md-10 mx-auto">
         <div class="card-body">
-          <h5 class="text-danger text-uppercase">You are not authorized to view this document</h5>
+          <h5 class="text-danger text-uppercase text-center">You are not authorized to view this document</h5>
           <div class="row mt-5">
             <div class="d-flex w-100 align-content-center justify-content-center">
               <router-link to="/" tag="button" class="btn btn-raised btn-info">Return Home</router-link>

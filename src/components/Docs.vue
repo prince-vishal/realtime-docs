@@ -1,15 +1,22 @@
 <template>
 
     <div class="container">
+
+        <div class="mt-2" v-if="ownedDocs.length<=0">
+            <div class="card-header">
+                <h6> You have not created any document yet</h6>
+            </div>
+        </div>
+
         <div class="row px-0">
             <div class="col-11 mx-auto mt-2 px-0">
 
                 <div class="row px-0 mx-0">
-                    <div class="card px-3 py-5 col-md-2 col-sm-6 mb-1 doc-card doc-create-card mr-2">
+                    <router-link tag="div" to="/docs/create" class="card px-3 py-5 col-md-2 col-sm-6 mb-1 doc-card doc-create-card mr-2">
 
                         <span class="mx-auto my-auto text-dark">Create Doc</span>
                         <span class="fa fa-plus fa-2x mx-auto my-auto"></span>
-                    </div>
+                    </router-link>
                     <div class="card col-md-2 col-sm-6 doc-card mr-1 mb-1" v-for="doc in ownedDocs" :key="doc.id">
 
                         <router-link :to="'/doc/'+ doc.id" tag="div" class="card-body d-flex">
@@ -21,7 +28,7 @@
 
                 <hr>
 
-                <div class="row mt-2 mb-2 mx-0 px-0">
+                <div class="row mt-2 mb-2 mx-0 px-0" v-if="viewedDocs.length > 0">
                     <h5 class="">Recently Viewed</h5>
                 </div>
 
@@ -34,13 +41,6 @@
                             <p class="mx-auto my-auto">{{doc.title}}</p>
 
                         </router-link>
-                    </div>
-                </div>
-
-
-                <div class="mt-2" v-if="ownedDocs.length<=0">
-                    <div class="card-header">
-                        <h6> You have not created any document yet</h6>
                     </div>
                 </div>
 
@@ -64,7 +64,7 @@
 </style>
 <script>
     export default {
-        title:"Realtime Docs",
+        title: "Realtime Docs",
         name: 'Docs',
         data() {
             return {

@@ -1,7 +1,7 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <div id="app">
         <nav class="navbar navbar-expand-lg navbar-light bb-0 bg-white px-3" v-if="!isLoggedIn || !currentPage.includes('/doc/')">
-            <a class="navbar-brand" href="#">Postman Docs</a>
+            <a class="navbar-brand" href="/">Postman Docs</a>
             <ul class="navbar-nav ml-auto flex-sm-row flex-column">
                 <li class="nav-item" :class="[currentPage=='/'?'active':'']">
                     <router-link class="nav-link" to="/">Home</router-link>

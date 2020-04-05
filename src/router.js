@@ -6,6 +6,7 @@ import Register from './components/auth/Register.vue'
 import Doc from './components/Doc.vue'
 import Docs from './components/Docs.vue'
 import Error from './components/Error.vue'
+import CreateDoc from './components/CreateDoc.vue'
 
 Vue.use(Router);
 
@@ -25,6 +26,14 @@ let router = new Router({
             path: '/error',
             name: 'error',
             component: Error,
+        },
+        {
+            path: '/docs/create',
+            name: 'error',
+            component: CreateDoc,
+            meta: {
+                requiresAuth: true
+            }
         },
         {
             path: '/login',
