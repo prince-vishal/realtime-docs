@@ -64,6 +64,7 @@
 </style>
 <script>
     export default {
+        title:"Realtime Docs",
         name: 'Docs',
         data() {
             return {

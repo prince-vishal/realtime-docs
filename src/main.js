@@ -5,13 +5,16 @@ import router from './router'
 import Axios from "axios";
 import {loadProgressBar} from 'axios-progress-bar'
 import 'axios-progress-bar/dist/nprogress.css'
+import titleMixin from './mixins/titleMixin'
 
 window.Pusher = require('pusher-js');
 
 Axios.defaults.baseURL = "https://docs-backend.herokuapp.com/";
 Vue.prototype.$http = Axios;
 
-loadProgressBar({}, Axios)
+loadProgressBar({}, Axios);
+
+Vue.mixin(titleMixin);
 
 
 const token = localStorage.getItem('token');

@@ -11,6 +11,7 @@ const state = {
     token: localStorage.getItem('token') || '',
     user: localStorage.getItem('user') || "",
     showViewers: false,
+    isAuthorized: false,
     currentDoc: {},
     currentViewers: new Map(),
     reRenderKey: utility.makeid(6)
@@ -30,6 +31,9 @@ const mutations = {
         state.status = 'success';
         if (Object.prototype.hasOwnProperty.call(data, 'ownedDocs'))
             state.ownedDocs = data.ownedDocs;
+
+        if (Object.prototype.hasOwnProperty.call(data, 'isAuthorized'))
+            state.isAuthorized = data.isAuthorized;
 
         if (Object.prototype.hasOwnProperty.call(data, 'recentlyViewedDocs'))
             state.recentlyViewedDocs = data.recentlyViewedDocs;
@@ -62,7 +66,6 @@ const mutations = {
     hide_viewers(state) {
         state.showViewers = false;
     },
-
 
 
     /*
@@ -140,7 +143,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint + '/', method: 'GET'})
+                    axios({url: docsEndPoint, method: 'GET'})
                         .then(resp => {
                             console.log(resp.data.data);
                             commit('docs_success', {"ownedDocs": resp.data.data});
@@ -245,6 +248,33 @@ const actions = {
 
         });
     },
+    /*
+    * Fetch doc details
+    * */
+    checkIsAuthorized({dispatch, commit}, docData) {
+        return new Promise((resolve, reject) => {
+            commit('docs_request');
+            dispatch('checkIfAuthenticated')
+                .then(() => {
+                    axios({url: docsEndPoint + '/' + docData.id +'/is_authorized', method: 'GET'})
+                        .then(resp => {
+                            console.log(resp.data.data);
+                            commit('docs_success', {"isAuthorized": true});
+                            resolve(resp.data)
+                        })
+                        .catch(err => {
+                            commit('docs_success', {"isAuthorized": false});
+                            reject(err)
+                        });
+
+                })
+                .catch(err => {
+                    commit('docs_error', err);
+                    reject(err)
+                });
+
+        });
+    },
 };
 const getters = {
     isLoggedIn: state => !!state.token,
@@ -255,6 +285,7 @@ const getters = {
     currentViewers: state => state.currentViewers,
     currentDoc: state => state.currentDoc,
     reRenderKey: state => state.reRenderKey,
+    isAuthorized: state => state.isAuthorized,
 
 };
 

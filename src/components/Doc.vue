@@ -20,15 +20,15 @@
     import Echo from "laravel-echo";
 
     export default {
+        title:"Realtime Docs | ",
         name: 'Doc',
         components: {
             Layout,
             Header,
             Main
         },
-        data:function() {
-            return {
-            }
+        data: function () {
+            return {}
         },
 
         created() {
@@ -94,12 +94,18 @@
                 if (this.showViewers === true) {
                     this.fetchViewers();
                 }
+            },
+            currentDoc() {
+               this.title = this.currentDoc.title + "| Realtime Docs"
             }
 
         },
         computed: {
             showViewers() {
                 return this.$store.getters['docs/showViewers'];
+            },
+            currentDoc() {
+                return this.$store.getters['docs/currentDoc'];
             },
 
 
