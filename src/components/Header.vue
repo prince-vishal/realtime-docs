@@ -1,6 +1,7 @@
 <template>
     <nav class="navbar navbar-expand-lg navbar-light bb-0 bg-white px-3">
         <router-link class="navbar-brand" to="/">Postman Docs</router-link>
+        <span class="navbar-brand text-muted text-capitalize">{{currentDoc.title}}</span>
         <div class="ml-auto" style="display: inline-flex">
             <div id="docs-presence-container" class="presence-inline-block docs-titlebar-button d-flex">
                 <div id="docs-presence" class="presence-inline-block mr-auto"
@@ -227,7 +228,8 @@
         name: 'Header',
         props: ['doc_id'],
         watch: {
-
+            // A hack to force re-render of map values, currently vue does not
+            // supports reactivity for maps or sets
             reRenderKey() {
                 this.current_viewers = Array.from(this.$store.getters['docs/currentViewers'].values());
             }
@@ -250,7 +252,11 @@
                     return false;
 
                 }
-            }
+            },
+            currentDoc() {
+                return this.$store.getters['docs/currentDoc'];
+            },
+
         },
 
         data: () => ({

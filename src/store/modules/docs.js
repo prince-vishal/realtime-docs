@@ -132,7 +132,7 @@ const actions = {
     },
 
     /*
-    * Fet a list of docs created by this user
+    * Fetch a list of docs created by this user
     *
     * */
     fetchOwnedDocs({dispatch, commit}) {
@@ -144,6 +144,34 @@ const actions = {
                         .then(resp => {
                             console.log(resp.data.data);
                             commit('docs_success', {"ownedDocs": resp.data.data});
+                            resolve(resp.data)
+                        })
+                        .catch(err => {
+                            dispatch('checkAndLogout', err);
+                            commit('docs_error', err);
+                            reject(err)
+                        });
+
+                })
+                .catch(err => {
+                    commit('docs_error', err);
+                    reject(err)
+                });
+
+        });
+    },
+    /*
+    * Fetch viewed docs for current user
+    * */
+    fetchViewedDocs({dispatch, commit}) {
+        return new Promise((resolve, reject) => {
+            commit('docs_request');
+            dispatch('checkIfAuthenticated')
+                .then(() => {
+                    axios({url: docsEndPoint + '/viewed', method: 'GET'})
+                        .then(resp => {
+                            console.log(resp.data.data);
+                            commit('docs_success', {"recentlyViewedDocs": resp.data.data});
                             resolve(resp.data)
                         })
                         .catch(err => {
@@ -221,7 +249,7 @@ const actions = {
 const getters = {
     isLoggedIn: state => !!state.token,
     ownedDocs: state => state.ownedDocs,
-    recentlyViewedDocs: state => state.viewedDocs,
+    recentlyViewedDocs: state => state.recentlyViewedDocs,
     viewers: state => state.viewers,
     showViewers: state => state.showViewers,
     currentViewers: state => state.currentViewers,

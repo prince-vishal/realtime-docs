@@ -90,13 +90,6 @@
 
         },
         watch: {
-
-            email() {
-                this.error = "";
-            },
-            password() {
-                this.error = "";
-            },
             showViewers() {
                 if (this.showViewers === true) {
                     this.fetchViewers();
@@ -122,7 +115,7 @@
                     })
                     .catch((err) => {
                         console.log(err);
-                        if (err != undefined && !err.response.success)
+                        if (err !== undefined && !err.response.success)
                             this.error = err.response.data.error;
                     });
             }

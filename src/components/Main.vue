@@ -2,7 +2,7 @@
     <div class="container">
         <div class="bg-white doc-container"></div>
         <transition name="fade" :duration="200">
-            <div class="current-viewers-dialog " tabindex="-1" role="dialog" v-show="showViewers">
+            <div class="current-viewers-dialog " tabindex="-1" role="dialog" v-if="showViewers">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header border-bottom">
@@ -52,7 +52,7 @@
 
     .current-viewers-dialog .modal-body {
         overflow-y: auto;
-        max-height: 85vh;
+        max-height: 80vh;
     }
 
     .doc-container {
