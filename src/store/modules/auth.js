@@ -1,7 +1,11 @@
 import Api from './../../Api'
+import {loadProgressBar} from 'axios-progress-bar'
 
 const authEndPoint = "/auth/v1";
 const axios = Api();
+
+loadProgressBar({}, axios);
+
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 axios.interceptors.request.use (

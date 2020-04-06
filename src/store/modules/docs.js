@@ -1,11 +1,13 @@
 import Api from './../../Api'
 import utility from './../../utilities';
+import {loadProgressBar} from 'axios-progress-bar'
 
 const docsEndPoint = "/api/v1/docs";
 
 const axios = Api();
-axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
+loadProgressBar({}, axios);
 
+axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 axios.interceptors.request.use(
     async (config) => {
         const token = localStorage.getItem('token');
@@ -16,6 +18,7 @@ axios.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+
 const state = {
     viewers: new Map(),
     ownedDocs: [],
