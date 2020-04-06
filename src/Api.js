@@ -1,7 +1,7 @@
 import axios from 'axios'
-import {loadProgressBar} from 'axios-progress-bar'
+// import {loadProgressBar} from 'axios-progress-bar'
 
-loadProgressBar({}, axios);
+// loadProgressBar({}, axios);
 
 export default () => {
     return axios.create({

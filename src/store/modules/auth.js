@@ -1,7 +1,10 @@
 import Api from './../../Api'
 
 const authEndPoint = "/auth/v1";
-Api().interceptors.request.use (
+const axios = Api();
+axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
+
+axios.interceptors.request.use (
     async (config) => {
         const token = localStorage.getItem('token');
         if (token)
@@ -46,12 +49,12 @@ const actions = {
     register({commit}, user) {
         return new Promise((resolve, reject) => {
             commit('auth_request');
-            Api()({url: authEndPoint + '/register', data: user, method: 'POST'})
+            axios({url: authEndPoint + '/register', data: user, method: 'POST'})
                 .then(resp => {
                     const token = 'Bearer' + ' ' + resp.data.access_token;
                     localStorage.setItem('token', token);
                     // Add the following line:
-                    // Api.defaults.headers.common['Authorization'] = token;
+                    axios.defaults.headers.common['Authorization'] = token;
                     commit('auth_success', {'token': token, 'user': resp.data.user});
                     localStorage.setItem('user', JSON.stringify(resp.data.user));
                     resolve(resp)
@@ -69,11 +72,11 @@ const actions = {
     login({commit}, userData) {
         return new Promise((resolve, reject) => {
             commit('auth_request');
-            Api()({url: authEndPoint + '/login', data: userData, method: 'POST'})
+            axios({url: authEndPoint + '/login', data: userData, method: 'POST'})
                 .then(resp => {
                     const token = 'Bearer' + ' ' + resp.data.access_token;
                     localStorage.setItem('token', token);
-                    // Api.defaults.headers.common['Authorization'] = token;
+                    axios.defaults.headers.common['Authorization'] = token;
                     commit('auth_success', {'token': token, 'user': resp.data.user});
                     localStorage.setItem('user', JSON.stringify(resp.data.user));
 
@@ -96,7 +99,7 @@ const actions = {
                 commit('logout');
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                delete Api().defaults.headers.common['Authorization'];
+                delete axios.defaults.headers.common['Authorization'];
                 resolve()
             })
         }

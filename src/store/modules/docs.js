@@ -2,7 +2,11 @@ import Api from './../../Api'
 import utility from './../../utilities';
 
 const docsEndPoint = "/api/v1/docs";
-Api().interceptors.request.use(
+
+const axios = Api();
+axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
+
+axios.interceptors.request.use(
     async (config) => {
         const token = localStorage.getItem('token');
         if (token) config.headers.Authorization = `${token}`;
@@ -140,7 +144,7 @@ const actions = {
             if (!rootGetters['auth/isLoggedIn']) {
                 reject("Unauthenticated");
             } else {
-                Api().defaults.headers.common['Authorization'] = localStorage.getItem('token');
+                axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
                 resolve()
             }
         });
@@ -173,7 +177,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    Api()({url: docsEndPoint, method: 'GET'})
+                    axios({url: docsEndPoint, method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"ownedDocs": resp.data.data});
                             resolve(resp.data)
@@ -200,7 +204,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    Api()({url: docsEndPoint + '/viewed', method: 'GET'})
+                    axios({url: docsEndPoint + '/viewed', method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"recentlyViewedDocs": resp.data.data});
                             resolve(resp.data)
@@ -228,7 +232,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    Api()({url: docsEndPoint + '/' + docData.id + '/viewers', method: 'GET'})
+                    axios({url: docsEndPoint + '/' + docData.id + '/viewers', method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"viewers": resp.data.data});
                             resolve(resp.data)
@@ -255,7 +259,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    Api()({url: docsEndPoint + '/' + docData.id, method: 'GET'})
+                    axios({url: docsEndPoint + '/' + docData.id, method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"currentDoc": resp.data.data});
                             resolve(resp.data)
@@ -282,7 +286,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    Api()({url: docsEndPoint + '/' + docData.id + '/is_authorized', method: 'GET'})
+                    axios({url: docsEndPoint + '/' + docData.id + '/is_authorized', method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"isAuthorized": true});
                             resolve(resp.data)
@@ -309,7 +313,7 @@ const actions = {
             docData['access_role'] = "edit";
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    Api()({url: docsEndPoint + '/' + docData.id + '/share', data: docData, method: 'PUT'})
+                    axios({url: docsEndPoint + '/' + docData.id + '/share', data: docData, method: 'PUT'})
                         .then(resp => {
                             commit('docs_success', {"shared": true});
                             resolve(resp.data)
@@ -335,7 +339,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    Api()({url: '/api/v1/users', method: 'GET'})
+                    axios({url: '/api/v1/users', method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"users": resp.data.data});
                             resolve(resp.data)
@@ -360,7 +364,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    Api()({url: docsEndPoint, data: docData, method: 'POST'})
+                    axios({url: docsEndPoint, data: docData, method: 'POST'})
                         .then(resp => {
                             commit('docs_success', {"doc": resp.data.data});
                             resolve(resp.data)
