@@ -149,7 +149,6 @@
 
             values() {
                 this.error = false;
-                this.shared = false;
             }
 
         },
