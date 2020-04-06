@@ -1,9 +1,17 @@
-import axios from 'axios'
+import Api from './../../Api'
 import utility from './../../utilities';
 
 const docsEndPoint = "/api/v1/docs";
-axios.defaults.headers.common['Accept'] = 'application/json';// for all requests
-
+Api().interceptors.request.use(
+    async (config) => {
+        const token = localStorage.getItem('token');
+        if (token) config.headers.Authorization = `${token}`;
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 const state = {
     viewers: new Map(),
     ownedDocs: [],
@@ -16,7 +24,7 @@ const state = {
     currentDoc: {},
     currentViewers: new Map(),
     reRenderKey: utility.makeid(6),
-    users:[]
+    users: []
 };
 const mutations = {
     /*
@@ -33,6 +41,9 @@ const mutations = {
         state.status = 'success';
         if (Object.prototype.hasOwnProperty.call(data, 'ownedDocs'))
             state.ownedDocs = data.ownedDocs;
+
+        if (Object.prototype.hasOwnProperty.call(data, 'doc'))
+            state.ownedDocs.push(data.doc);
 
         if (Object.prototype.hasOwnProperty.call(data, 'isAuthorized'))
             state.isAuthorized = data.isAuthorized;
@@ -124,12 +135,12 @@ const actions = {
     /*
     * Check if the user is authenticated
     * */
-    checkIfAuthenticated({rootGetters, state}) {
+    checkIfAuthenticated({rootGetters}) {
         return new Promise((resolve, reject) => {
             if (!rootGetters['auth/isLoggedIn']) {
                 reject("Unauthenticated");
             } else {
-                axios.defaults.headers.common['Authorization'] = state.token || localStorage.getItem('token');
+                Api().defaults.headers.common['Authorization'] = localStorage.getItem('token');
                 resolve()
             }
         });
@@ -162,7 +173,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint, method: 'GET'})
+                    Api()({url: docsEndPoint, method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"ownedDocs": resp.data.data});
                             resolve(resp.data)
@@ -189,7 +200,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint + '/viewed', method: 'GET'})
+                    Api()({url: docsEndPoint + '/viewed', method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"recentlyViewedDocs": resp.data.data});
                             resolve(resp.data)
@@ -217,7 +228,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint + '/' + docData.id + '/viewers', method: 'GET'})
+                    Api()({url: docsEndPoint + '/' + docData.id + '/viewers', method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"viewers": resp.data.data});
                             resolve(resp.data)
@@ -244,7 +255,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint + '/' + docData.id, method: 'GET'})
+                    Api()({url: docsEndPoint + '/' + docData.id, method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"currentDoc": resp.data.data});
                             resolve(resp.data)
@@ -271,7 +282,7 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint + '/' + docData.id + '/is_authorized', method: 'GET'})
+                    Api()({url: docsEndPoint + '/' + docData.id + '/is_authorized', method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"isAuthorized": true});
                             resolve(resp.data)
@@ -298,7 +309,7 @@ const actions = {
             docData['access_role'] = "edit";
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint + '/' + docData.id + '/share', data: docData, method: 'PUT'})
+                    Api()({url: docsEndPoint + '/' + docData.id + '/share', data: docData, method: 'PUT'})
                         .then(resp => {
                             commit('docs_success', {"shared": true});
                             resolve(resp.data)
@@ -324,9 +335,34 @@ const actions = {
             commit('docs_request');
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: '/api/v1/users', method: 'GET'})
+                    Api()({url: '/api/v1/users', method: 'GET'})
                         .then(resp => {
                             commit('docs_success', {"users": resp.data.data});
+                            resolve(resp.data)
+                        })
+                        .catch(err => {
+                            commit('docs_error', err);
+                            reject(err)
+                        });
+
+                })
+                .catch(err => {
+                    commit('docs_error', err);
+                    reject(err)
+                });
+
+        });
+    },
+
+
+    create({dispatch, commit}, docData) {
+        return new Promise((resolve, reject) => {
+            commit('docs_request');
+            dispatch('checkIfAuthenticated')
+                .then(() => {
+                    Api()({url: docsEndPoint, data: docData, method: 'POST'})
+                        .then(resp => {
+                            commit('docs_success', {"doc": resp.data.data});
                             resolve(resp.data)
                         })
                         .catch(err => {

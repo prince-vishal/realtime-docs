@@ -17,8 +17,9 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="data" class="bmd-label-floating">Data</label>
-                                    <input type="text" class="form-control" id="data"
-                                           v-model="data">
+                                    <textarea rows="=5" class="form-control" id="data"
+                                              v-model="data">
+                                    </textarea>
                                 </div>
                                 <button type="submit" class="btn btn-raised btn-primary">Create</button>
                             </form>
@@ -56,20 +57,21 @@
         },
         methods: {
             createDoc: function () {
-                // let email = this.email;
-                // let password = this.password;
-                // this.$store
-                //     .dispatch("auth/login", {email, password})
-                //     .then(() => {
-                //         this.$router.push({ name: 'doc', params: { id: '1' } });
-                //         console.log("Logged In");
-                //
-                //     })
-                //     .catch((err) => {
-                //         console.log(err);
-                //         if (err != undefined && !err.response.success)
-                //             this.error = err.response.data.error;
-                //     });
+                let title = this.title;
+                let data = this.data;
+                this.$store
+                    .dispatch("docs/create", {title, data: {data}})
+                    .then((res) => {
+                        console.log(res);
+                        this.$router.push({name: 'doc', params: {id: res.data.id}});
+                        console.log("Create doc");
+
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        if (err != undefined && !err.response.success)
+                            this.error = err.response.data.error;
+                    });
             }
         }
     };

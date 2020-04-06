@@ -29,7 +29,7 @@ let router = new Router({
         },
         {
             path: '/docs/create',
-            name: 'error',
+            name: 'createDoc',
             component: CreateDoc,
             meta: {
                 requiresAuth: true

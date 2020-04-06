@@ -1,7 +1,20 @@
-import axios from 'axios'
+import Api from './../../Api'
 
 const authEndPoint = "/auth/v1";
-axios.defaults.headers.common['Accept'] = 'application/json';// for all requests
+Api().interceptors.request.use (
+    async (config) => {
+        const token = localStorage.getItem('token');
+        if (token)
+        {
+            console.log(token);
+            config.headers.Authorization = `${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject (error);
+    }
+);
 
 const state = {
     status: '',
@@ -33,12 +46,12 @@ const actions = {
     register({commit}, user) {
         return new Promise((resolve, reject) => {
             commit('auth_request');
-            axios({url: authEndPoint + '/register', data: user, method: 'POST'})
+            Api()({url: authEndPoint + '/register', data: user, method: 'POST'})
                 .then(resp => {
                     const token = 'Bearer' + ' ' + resp.data.access_token;
                     localStorage.setItem('token', token);
                     // Add the following line:
-                    axios.defaults.headers.common['Authorization'] = token;
+                    // Api.defaults.headers.common['Authorization'] = token;
                     commit('auth_success', {'token': token, 'user': resp.data.user});
                     localStorage.setItem('user', JSON.stringify(resp.data.user));
                     resolve(resp)
@@ -56,11 +69,11 @@ const actions = {
     login({commit}, userData) {
         return new Promise((resolve, reject) => {
             commit('auth_request');
-            axios({url: authEndPoint + '/login', data: userData, method: 'POST'})
+            Api()({url: authEndPoint + '/login', data: userData, method: 'POST'})
                 .then(resp => {
                     const token = 'Bearer' + ' ' + resp.data.access_token;
                     localStorage.setItem('token', token);
-                    axios.defaults.headers.common['Authorization'] = token;
+                    // Api.defaults.headers.common['Authorization'] = token;
                     commit('auth_success', {'token': token, 'user': resp.data.user});
                     localStorage.setItem('user', JSON.stringify(resp.data.user));
 
@@ -83,7 +96,7 @@ const actions = {
                 commit('logout');
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                delete axios.defaults.headers.common['Authorization'];
+                delete Api().defaults.headers.common['Authorization'];
                 resolve()
             })
         }
