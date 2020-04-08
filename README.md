@@ -32,7 +32,7 @@ and contains logic for maintaining users with which a Doc is shared with,along
  table to maintain a Many to Many relationship between Doc and User (Shared to). 
   
 ### **Deployment Details** 
-- #####Backend :
+- ##### Backend :
     1. **Database** : Amazon RDS instance
     2. **Server** : Heroku
 - ##### Frontend:

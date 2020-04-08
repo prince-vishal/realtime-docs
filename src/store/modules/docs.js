@@ -313,10 +313,12 @@ const actions = {
     shareDoc({dispatch, commit}, docData) {
         return new Promise((resolve, reject) => {
             commit('docs_request');
-            docData['access_role'] = "edit";
+            let data ={};
+            data['accessRole'] = "edit";
+            data['sharingTo'] = docData['sharing_to'];
             dispatch('checkIfAuthenticated')
                 .then(() => {
-                    axios({url: docsEndPoint + '/' + docData.id + '/share', data: docData, method: 'PUT'})
+                    axios({url: docsEndPoint + '/' + docData.id + '/share', data: data, method: 'PUT'})
                         .then(resp => {
                             commit('docs_success', {"shared": true});
                             resolve(resp.data)
