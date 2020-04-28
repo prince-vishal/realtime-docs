@@ -315,7 +315,7 @@ const actions = {
             commit('docs_request');
             let data ={};
             data['accessRole'] = "edit";
-            data['sharingTo'] = docData['sharing_to'];
+            data['sharingTo'] = docData['sharingTo'];
             dispatch('checkIfAuthenticated')
                 .then(() => {
                     axios({url: docsEndPoint + '/' + docData.id + '/share', data: data, method: 'PUT'})

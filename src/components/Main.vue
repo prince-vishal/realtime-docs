@@ -53,7 +53,7 @@
                                 <p class="text-center my-auto">This document has been successfully shared</p>
                             </div>
                             <div class="alert alert-danger mx-2" v-if="error">
-                                <p class="text-center my-auto">Something went wrong</p>
+                                <p class="text-center my-auto">{{message || 'Something went wrong'}}</p>
                             </div>
                             <div class="row mx-0 px-0">
                                 <div class="col-8 mx-auto">
@@ -142,13 +142,15 @@
             values: [],
             active: true,
             shared: false,
-            error: false
+            error: false,
+            message: false
 
         }),
         watch: {
 
             values() {
                 this.error = false;
+                this.message = "";
             }
 
         },
@@ -195,7 +197,7 @@
                 this.values.forEach((value) => {
                     emails.push(value.email);
                 });
-                this.$store.dispatch('docs/shareDoc', {"id": this.currentDoc.id, "sharing_to": emails})
+                this.$store.dispatch('docs/shareDoc', {"id": this.currentDoc.id, "sharingTo": emails})
                     .then(() => {
                         this.active = true;
                         this.shared = true;
@@ -203,9 +205,9 @@
 
                     })
                     .catch((err) => {
-                        console.log(err);
                         this.active = true;
                         this.error = true;
+                        this.message = err.response.data.message;
                     });
 
             },
